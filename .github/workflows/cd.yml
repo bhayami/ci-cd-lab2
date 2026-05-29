@@ -8,10 +8,12 @@ on:
 permissions:
   contents: read
   packages: write
+  deployments: write
 
 jobs:
-  deploy:
+  deploy-dev:
     runs-on: ubuntu-latest
+    environment: dev
 
     steps:
       - name: Checkout
@@ -36,4 +38,28 @@ jobs:
             ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:v1.0.0
             ghcr.io/${{ github.repository }}:${{ github.sha }}
+
+
+  deploy-staging:
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://example-staging-url.com
+
+    steps:
+      - name: Approve and promote to staging
+        run: echo "Deploying to staging..."
+
+  deploy-prod:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+      url: https://example-prod-url.com
+
+    steps:
+      - name: Approve and promote to prod
+        run: echo "Deploying to production..."
+
 
